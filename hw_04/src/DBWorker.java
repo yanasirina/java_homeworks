@@ -25,11 +25,22 @@ public class DBWorker {
         }
     }
 
+    private boolean checkIfTableExists(String tableName) {
+        try {
+            DatabaseMetaData meta = connection.getMetaData();
+            ResultSet resultSet = meta.getTables(null, null, tableName, null);
+            return resultSet.next();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
     public void listTables() {
         String query = "SHOW TABLES";
         try (Statement statement = connection.createStatement();
              ResultSet resultSet = statement.executeQuery(query)) {
-            System.out.println("Tables in the database:");
+            System.out.println("Таблицы в базе данных:");
             while (resultSet.next()) {
                 System.out.println(resultSet.getString(1));
             }
@@ -53,6 +64,11 @@ public class DBWorker {
     }
 
     public void addWorkerFromInput() {
+        if (!checkIfTableExists(tableName)) {
+            System.out.println("Таблица не существует, невозможно добавить сотрудника...");
+            return;
+        }
+
         Scanner scanner = new Scanner(System.in);
         System.out.print("Введите имя: ");
         String name = scanner.nextLine();
@@ -63,7 +79,7 @@ public class DBWorker {
         addWorker(new Worker(name, age, salary));
     }
 
-    public void addWorker(Worker worker) {
+    private void addWorker(Worker worker) {
         String query = "INSERT INTO " + tableName + " (name, age, salary) VALUES (?, ?, ?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, worker.getName());
@@ -77,13 +93,18 @@ public class DBWorker {
     }
 
     public void listAllWorkers() {
+        if (!checkIfTableExists(tableName)) {
+            System.out.println("Таблица не существует, невозможно вывести записи...");
+            return;
+        }
+
         List<Worker> workers = getAllWorkers();
         for (Worker worker : workers) {
             System.out.println(worker);
         }
     }
 
-    public List<Worker> getAllWorkers() {
+    private List<Worker> getAllWorkers() {
         List<Worker> workers = new ArrayList<>();
         String query = "SELECT name, age, salary FROM " + tableName;
         try (Statement statement = connection.createStatement();
@@ -101,6 +122,11 @@ public class DBWorker {
     }
 
     public void saveToExcel() {
+        if (!checkIfTableExists(tableName)) {
+            System.out.println("Таблица не существует, невозможно получить сотрудников...");
+            return;
+        }
+
         List<Worker> workers = getAllWorkers();
         try (Workbook workbook = new XSSFWorkbook()) {
             Sheet sheet = workbook.createSheet(tableName);
