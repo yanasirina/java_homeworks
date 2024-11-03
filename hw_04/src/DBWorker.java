@@ -2,6 +2,7 @@ import java.sql.*;
 import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.InputMismatchException;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import java.io.FileOutputStream;
@@ -183,21 +184,26 @@ public class DBWorker {
             System.out.println("0. Выйти");
             System.out.print("Выберите действие: ");
 
-            int choice = scanner.nextInt();
-            scanner.nextLine();
+            try {
+                int choice = scanner.nextInt();
+                scanner.nextLine();
 
-            switch (choice) {
-                case 1 -> listTables();
-                case 2 -> createTable();
-                case 3 -> addWorkerFromInput();
-                case 4 -> listAllWorkers();
-                case 5 -> saveToExcel();
-                case 0 -> {
-                    System.out.println("Выход...");
-                    closeConnection();
-                    return;
+                switch (choice) {
+                    case 1 -> listTables();
+                    case 2 -> createTable();
+                    case 3 -> addWorkerFromInput();
+                    case 4 -> listAllWorkers();
+                    case 5 -> saveToExcel();
+                    case 0 -> {
+                        System.out.println("Выход...");
+                        closeConnection();
+                        return;
+                    }
+                    default -> System.out.println("Некорректный вариант, попробуйте еще раз.");
                 }
-                default -> System.out.println("Некорректный вариант, попробуйте еще раз.");
+            } catch (InputMismatchException e) {
+                System.out.println("Введите целое число.");
+                scanner.nextLine();
             }
         }
     }
